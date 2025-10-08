@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "geopolitical-data-platform"
+version = "0.1.0"
+description = "Modern data platform for geopolitical and conflict analysis with Dagster, dbt, and Streamlit"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+dagster = "^1.7.0"
+dagster-webserver = "^1.7.0"
+dagster-postgres = "^0.23.0"
+dagster-dbt = "^0.23.0"
+dbt-core = "^1.7.0"
+dbt-postgres = "^1.7.0"
+pandas = "^2.2.0"
+numpy = "^1.26.0"
+pyarrow = "^15.0.0"
+openpyxl = "^3.1.2"
+sqlalchemy = "^2.0.25"
+psycopg2-binary = "^2.9.9"
+requests = "^2.31.0"
+geopandas = "^0.14.0"
+folium = "^0.15.0"
+streamlit = "^1.31.0"
+plotly = "^5.18.0"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+black = "^24.1.0"
+ruff = "^0.2.0"
+jupyter = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"

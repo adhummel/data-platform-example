@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Data (GTD data should not be committed due to terms of use)
+data/raw/*
+data/processed/*
+*.csv
+*.xlsx
+*.parquet
+!data/seeds/*.csv
+
+# dbt
+dbt_project/logs/
+dbt_project/target/
+dbt_project/dbt_packages/
+
+# Dagster
+dagster_home/
+.dagster/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/
