@@ -1,7 +1,7 @@
 # Orchestration
 dagster==1.7.0
 dagster-webserver==1.7.0
-dagster-postgres==0.23.0
+dagster-postgres==1.6.9
 dagster-dbt==0.23.0
 
 # Transformation
