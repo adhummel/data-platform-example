@@ -57,7 +57,7 @@ def gtd_raw_data(context: AssetExecutionContext) -> Output:
     
     df.to_sql(
         name='gtd_incidents',
-        schema='raw_data',
+        schema='raw',
         con=engine,
         if_exists='replace',  # Change to 'append' for incremental loads
         index=False,
