@@ -20,7 +20,7 @@ def get_postgres_connection():
         f"@{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}"
         f"/{os.getenv('DATABASE_NAME')}"
     )
-    create_engine(db_url)
+    return create_engine(db_url)
 
 @asset(
     description="Raw GTD data loaded from Excel file into PostgreSQL",
