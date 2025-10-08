@@ -22,7 +22,7 @@ psycopg2-binary = "^2.9.9"
 requests = "^2.31.0"
 geopandas = "^0.14.0"
 folium = "^0.15.0"
-streamlit = "^1.31.0"
+# streamlit = "^1.31.0"  # Will add later with Python 3.10+
 plotly = "^5.18.0"
 python-dotenv = "^1.0.0"
 
