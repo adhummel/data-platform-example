@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Modern data platform for geopolitical and conflict analysis with Dagster, dbt, and Streamlit"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
