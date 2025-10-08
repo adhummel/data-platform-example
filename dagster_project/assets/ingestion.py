@@ -29,13 +29,13 @@ def get_postgres_connection():
 )
 def gtd_raw_data(context: AssetExecutionContext) -> Output:
     """
-    Load GTD Excel file and ingest into raw_data schema.
+    Load GTD Excel file and ingest into raw schema.
     
     This asset:
     1. Reads the GTD Excel file (200k+ rows)
     2. Selects key columns (50+ fields)
     3. Cleans missing values (GTD uses -9, -99 as null codes)
-    4. Loads to PostgreSQL raw_data.gtd_incidents table
+    4. Loads to PostgreSQL raw.gtd_incidents table
     5. Returns metadata about the load
     """
     gtd_file_path = os.getenv('GTD_DATA_PATH', 'data/raw/globalterrorismdb_0522dist.xlsx')
@@ -52,7 +52,7 @@ def gtd_raw_data(context: AssetExecutionContext) -> Output:
 
     engine = get_postgres_connection()
 
-    context.log.info(f"💾 Writing {len(df.columns)} columns to raw_data.gtd_incidents...")
+    context.log.info(f"💾 Writing {len(df.columns)} columns to raw.gtd_incidents...")
     context.log.info(f"   This preserves ALL source data for downstream transformations")
     
     df.to_sql(
