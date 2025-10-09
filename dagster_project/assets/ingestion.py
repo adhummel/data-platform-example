@@ -23,6 +23,7 @@ def get_postgres_connection():
     return create_engine(db_url)
 
 @asset(
+    key=["data_raw", "gtd_incidents"],
     description="Raw GTD data loaded from Excel file into PostgreSQL",
     compute_kind="pandas",
     group_name="ingestion",
