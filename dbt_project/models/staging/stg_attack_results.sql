@@ -10,7 +10,7 @@ select
     , CASE
     WHEN approxdate is not null and approxdate ~ '\d{4}' then
         to_date(
-            regex_replace(approxdate, '(\d+)-\d+', '\1')
+            regexp_replace(approxdate, '(\d+)-\d+', '\1')
             , 'Month DD, YYYY'
         )
     ELSE NULL
