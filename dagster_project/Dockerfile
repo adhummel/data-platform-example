@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy and install Python dependencies
-COPY requirements.txt .
+COPY dagster_project/requirements.txt .
 RUN pip install --user --no-cache-dir -r requirements.txt
 
 # Final stage - minimal runtime image
@@ -18,9 +18,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install runtime dependencies only
+# Install runtime dependencies only (including postgresql-client for pg_isready)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy installed packages from builder
@@ -29,15 +30,24 @@ COPY --from=builder /root/.local /root/.local
 # Make sure scripts in .local are usable
 ENV PATH=/root/.local/bin:$PATH
 
-# Copy application code
-# We copy the parent directory structure to maintain the module path
-COPY . /app/dagster_project
+# Copy application code and dbt project
+COPY dagster_project /app/dagster_project
+COPY dbt_project /app/dbt_project
 
 # Set Python path so dagster can find the module
 ENV PYTHONPATH=/app:$PYTHONPATH
 
+# Copy entrypoint script
+COPY dagster_project/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+WORKDIR /app
+
 # Expose Dagster webserver port
 EXPOSE 3000
+
+# Use entrypoint to generate manifest before starting Dagster
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Default command runs webserver, but can be overridden for daemon
 CMD ["dagster", "dev", "-m", "dagster_project", "-h", "0.0.0.0", "-p", "3000"]

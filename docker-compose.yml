@@ -36,8 +36,8 @@ services:
   # Dagster Webserver (UI)
   dagster-webserver:
     build:
-      context: ./dagster_project
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: dagster_project/Dockerfile
     container_name: dagster_webserver
     restart: unless-stopped
     networks:
@@ -82,8 +82,8 @@ services:
 
   # dagster-daemon:
   #   build:
-  #     context: ./dagster_project
-  #     dockerfile: Dockerfile
+  #     context: .
+  #     dockerfile: dagster_project/Dockerfile
   #   container_name: dagster_daemon
   #   restart: unless-stopped
   #   networks:
