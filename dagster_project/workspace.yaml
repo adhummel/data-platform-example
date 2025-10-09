@@ -1,4 +1,4 @@
 load_from:
   - python_module:
-      module_name: global_terrorism_data
-      working_directory: ..
+      module_name: dagster_project
+      working_directory: /app

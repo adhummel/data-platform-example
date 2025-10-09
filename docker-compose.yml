@@ -70,6 +70,8 @@ services:
       - ./data:/data:ro
       # Mount dagster home for metadata storage
       - dagster_home:/root/.dagster
+      # Mount dagster configuration
+      - ./dagster_project/dagster.yaml:/root/.dagster/dagster.yaml
     command: ["dagster", "dev", "-m", "dagster_project", "-h", "0.0.0.0", "-p", "3000"]
 
   # Dagster Daemon (for schedules/sensors)
@@ -107,7 +109,9 @@ services:
     volumes:
       - ./data:/data:ro
       - dagster_home:/root/.dagster
-    command: ["dagster-daemon", "run"]
+      - ./dagster_project/workspace.yaml:/app/workspace.yaml
+      - ./dagster_project/dagster.yaml:/root/.dagster/dagster.yaml
+    command: ["dagster-daemon", "run", "-w", "/app/workspace.yaml"]
 
   # dbt Service (runs transformations)
   dbt:
