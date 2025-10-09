@@ -9,6 +9,9 @@ env/
 .venv
 *.egg-info/
 
+# Poetry (not used - using requirements.txt)
+poetry.lock
+
 # IDE
 .vscode/
 .idea/
@@ -35,6 +38,7 @@ dbt_project/dbt_packages/
 # Dagster
 dagster_home/
 .dagster/
+dagster_project/tmp*/
 
 # OS
 .DS_Store
