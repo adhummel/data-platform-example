@@ -10,7 +10,7 @@ select
     WHEN approxdate is not null and approxdate ~ '\d{4}' then
         to_date(
             regex_replace(approxdate, '(\d+)-\d+', '\1')
-            , Month DD, YYYY
+            , 'Month DD, YYYY'
         )
     ELSE NULL
     End as approx_date
@@ -18,4 +18,4 @@ select
     , motive
     , summary
 
-from raw.gtd_incidents
+from {{ref('raw_gtd')}}

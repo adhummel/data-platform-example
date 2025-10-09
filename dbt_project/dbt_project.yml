@@ -18,6 +18,9 @@ clean-targets:
 
 models:
   geopolitical_platform:
+    raw:
+      +materialized: view
+      +schema: raw
     staging:
       +materialized: view
       +schema: staging

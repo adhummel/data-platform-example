@@ -6,4 +6,4 @@ select
     , NULLIF(gname2, '') AS secondary_group
     , NULLIF(gname3, '') AS tertiary_group
 
-from {{ ref('raw', 'raw_gtd')}}
+from {{ ref('raw_gtd')}}

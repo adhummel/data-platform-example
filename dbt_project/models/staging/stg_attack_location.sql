@@ -5,7 +5,7 @@ select
     , country_txt as country
     , region as region_id
     , region_txt as region
-    , provstate as level
+    , provstate as province_state
     , city
     , latitude::float
     , longitude::float
@@ -13,4 +13,4 @@ select
     , vicinity
     , location
 
-from {{ref('raw', 'raw_gtd')}}
+from {{ref('raw_gtd')}}

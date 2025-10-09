@@ -7,4 +7,4 @@ select
     , target1 AS target_name
     , natlty1_txt AS target_nationality
 
-from {{ref('raw', 'raw_gtd')}}
+from {{ref('raw_gtd')}}

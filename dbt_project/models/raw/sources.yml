@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw data layer containing unprocessed source data
+    schema: raw
+    tables:
+      - name: gtd_incidents
+        description: Raw Global Terrorism Database incidents data ingested from Excel file
+        columns:
+          - name: eventid
+            description: Unique event identifier
+          - name: iyear
+            description: Year of incident
+          - name: imonth
+            description: Month of incident
+          - name: iday
+            description: Day of incident
