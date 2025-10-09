@@ -1,2 +1,2 @@
 select *
-from {{ source('raw', 'gtd_incidents')}}
+from {{ source('data_raw', 'gtd_incidents')}}

@@ -1,9 +1,9 @@
 version: 2
 
 sources:
-  - name: raw
-    description: Raw data layer containing unprocessed source data
-    schema: raw
+  - name: data_raw
+    description: Raw source data layer containing unprocessed data from external sources
+    schema: data_raw
     tables:
       - name: gtd_incidents
         description: Raw Global Terrorism Database incidents data ingested from Excel file

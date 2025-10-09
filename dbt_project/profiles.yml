@@ -8,6 +8,6 @@ geopolitical_platform:
       user: "{{ env_var('DATABASE_USER', 'postgres') }}"
       password: "{{ env_var('DATABASE_PASSWORD', 'postgres') }}"
       dbname: "{{ env_var('DATABASE_NAME', 'geopolitical_platform') }}"
-      schema: public
+      schema: dbt
       threads: 4
       keepalives_idle: 0

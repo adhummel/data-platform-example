@@ -52,12 +52,12 @@ def gtd_raw_data(context: AssetExecutionContext) -> Output:
 
     engine = get_postgres_connection()
 
-    context.log.info(f"💾 Writing {len(df.columns)} columns to raw.gtd_incidents...")
+    context.log.info(f"💾 Writing {len(df.columns)} columns to data_raw.gtd_incidents...")
     context.log.info(f"   This preserves ALL source data for downstream transformations")
     
     df.to_sql(
         name='gtd_incidents',
-        schema='raw',
+        schema='data_raw',
         con=engine,
         if_exists='replace',  # Change to 'append' for incremental loads
         index=False,
