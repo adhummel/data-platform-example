@@ -18,5 +18,26 @@ services:
       timeout: 5s
       retries: 5
 
+  dagster:
+    build: ./dagster_project
+    ports:
+      - 3000:3000
+    depends_on: postgres
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+    volumes:
+      - ./dagster_project:/app
+      - ./data:/data
+
+  dbt:
+    build: ./dbt_project
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_HOST: postgres
+    volumes:
+      - ./dbt_project:/dbt
+
 volumes:
   postgres_data:
