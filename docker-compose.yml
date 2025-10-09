@@ -74,44 +74,44 @@ services:
       - ./dagster_project/dagster.yaml:/root/.dagster/dagster.yaml
     command: ["dagster", "dev", "-m", "dagster_project", "-h", "0.0.0.0", "-p", "3000"]
 
-  # Dagster Daemon (for schedules/sensors)
-  dagster-daemon:
-    build:
-      context: ./dagster_project
-      dockerfile: Dockerfile
-    container_name: dagster_daemon
-    restart: unless-stopped
-    networks:
-      - geopolitical-net
-    depends_on:
-      postgres:
-        condition: service_healthy
-      dagster-webserver:
-        condition: service_started
-    environment:
-      # Database connection
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: ${DATABASE_NAME:-geopolitical_platform}
-      DATABASE_USER: ${DATABASE_USER:-postgres}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+  # Note: dagster-daemon is not needed when using 'dagster dev'
+  # The 'dagster dev' command runs both webserver and daemon together
+  # If you want to run them separately for production, use:
+  # - dagster-webserver (instead of 'dagster dev')
+  # - dagster-daemon (uncomment below)
 
-      # Dagster configuration
-      DAGSTER_HOME: /root/.dagster
-      DAGSTER_POSTGRES_USER: ${DATABASE_USER:-postgres}
-      DAGSTER_POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
-      DAGSTER_POSTGRES_DB: ${DATABASE_NAME:-geopolitical_platform}
-      DAGSTER_POSTGRES_HOSTNAME: postgres
-      DAGSTER_POSTGRES_PORT: 5432
-
-      # Data paths
-      GTD_DATA_PATH: ${GTD_DATA_PATH:-/data/raw/globalterrorismdb_0522dist.xlsx}
-    volumes:
-      - ./data:/data:ro
-      - dagster_home:/root/.dagster
-      - ./dagster_project/workspace.yaml:/app/workspace.yaml
-      - ./dagster_project/dagster.yaml:/root/.dagster/dagster.yaml
-    command: ["dagster-daemon", "run", "-w", "/app/workspace.yaml"]
+  # dagster-daemon:
+  #   build:
+  #     context: ./dagster_project
+  #     dockerfile: Dockerfile
+  #   container_name: dagster_daemon
+  #   restart: unless-stopped
+  #   networks:
+  #     - geopolitical-net
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     dagster-webserver:
+  #       condition: service_started
+  #   environment:
+  #     DATABASE_HOST: postgres
+  #     DATABASE_PORT: 5432
+  #     DATABASE_NAME: ${DATABASE_NAME:-geopolitical_platform}
+  #     DATABASE_USER: ${DATABASE_USER:-postgres}
+  #     DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+  #     DAGSTER_HOME: /root/.dagster
+  #     DAGSTER_POSTGRES_USER: ${DATABASE_USER:-postgres}
+  #     DAGSTER_POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+  #     DAGSTER_POSTGRES_DB: ${DATABASE_NAME:-geopolitical_platform}
+  #     DAGSTER_POSTGRES_HOSTNAME: postgres
+  #     DAGSTER_POSTGRES_PORT: 5432
+  #     GTD_DATA_PATH: ${GTD_DATA_PATH:-/data/raw/globalterrorismdb_0522dist.xlsx}
+  #   volumes:
+  #     - ./data:/data:ro
+  #     - dagster_home:/root/.dagster
+  #     - ./dagster_project/workspace.yaml:/app/workspace.yaml
+  #     - ./dagster_project/dagster.yaml:/root/.dagster/dagster.yaml
+  #   command: ["dagster-daemon", "run", "-w", "/app/workspace.yaml"]
 
   # dbt Service (runs transformations)
   dbt:
