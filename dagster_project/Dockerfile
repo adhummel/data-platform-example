@@ -30,7 +30,8 @@ COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
 
 # Copy application code
-COPY . .
+# We copy the parent directory structure to maintain the module path
+COPY . /app/dagster_project
 
 # Set Python path so dagster can find the module
 ENV PYTHONPATH=/app:$PYTHONPATH
