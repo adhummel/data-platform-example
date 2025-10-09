@@ -1,43 +1,158 @@
 version: '3.8'
 
+# Network for inter-service communication
+networks:
+  geopolitical-net:
+    driver: bridge
+
+# Persistent volumes
+volumes:
+  postgres_data:
+    driver: local
+  dagster_home:
+    driver: local
+
 services:
+  # PostgreSQL Database
   postgres:
-    image: postgres:15
-    container_name: geopolitical_data_db
+    image: postgres:15-alpine
+    container_name: geopolitical_db
+    restart: unless-stopped
+    networks:
+      - geopolitical-net
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: geopolitical_platform
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      POSTGRES_DB: ${DATABASE_NAME:-geopolitical_platform}
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - "${DATABASE_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres}"]
+      interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
-  dagster:
-    build: ./dagster_project
+  # Dagster Webserver (UI)
+  dagster-webserver:
+    build:
+      context: ./dagster_project
+      dockerfile: Dockerfile
+    container_name: dagster_webserver
+    restart: unless-stopped
+    networks:
+      - geopolitical-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database connection
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${DATABASE_NAME:-geopolitical_platform}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+
+      # Dagster configuration
+      DAGSTER_POSTGRES_USER: ${DATABASE_USER:-postgres}
+      DAGSTER_POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      DAGSTER_POSTGRES_DB: ${DATABASE_NAME:-geopolitical_platform}
+      DAGSTER_POSTGRES_HOSTNAME: postgres
+      DAGSTER_POSTGRES_PORT: 5432
+
+      # Data paths
+      GTD_DATA_PATH: ${GTD_DATA_PATH:-/data/raw/globalterrorismdb_0522dist.xlsx}
     ports:
-      - 3000:3000
-    depends_on: postgres
+      - "3000:3000"
+    volumes:
+      # Mount data directory for reading source files
+      - ./data:/data:ro
+      # Mount dagster home for metadata storage
+      - dagster_home:/root/.dagster
+    command: ["dagster", "dev", "-m", "dagster_project", "-h", "0.0.0.0", "-p", "3000"]
+
+  # Dagster Daemon (for schedules/sensors)
+  dagster-daemon:
+    build:
+      context: ./dagster_project
+      dockerfile: Dockerfile
+    container_name: dagster_daemon
+    restart: unless-stopped
+    networks:
+      - geopolitical-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      dagster-webserver:
+        condition: service_started
+    environment:
+      # Database connection
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${DATABASE_NAME:-geopolitical_platform}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+
+      # Dagster configuration
+      DAGSTER_POSTGRES_USER: ${DATABASE_USER:-postgres}
+      DAGSTER_POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      DAGSTER_POSTGRES_DB: ${DATABASE_NAME:-geopolitical_platform}
+      DAGSTER_POSTGRES_HOSTNAME: postgres
+      DAGSTER_POSTGRES_PORT: 5432
+
+      # Data paths
+      GTD_DATA_PATH: ${GTD_DATA_PATH:-/data/raw/globalterrorismdb_0522dist.xlsx}
+    volumes:
+      - ./data:/data:ro
+      - dagster_home:/root/.dagster
+    command: ["dagster-daemon", "run"]
+
+  # dbt Service (runs transformations)
+  dbt:
+    build:
+      context: ./dbt_project
+      dockerfile: Dockerfile
+    container_name: dbt_runner
+    networks:
+      - geopolitical-net
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-    volumes:
-      - ./dagster_project:/app
-      - ./data:/data
+      DATABASE_NAME: ${DATABASE_NAME:-geopolitical_platform}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    profiles:
+      - dbt
+    # dbt typically runs on-demand or via Dagster, so no persistent process
+    # Use: docker-compose run dbt dbt run
+    # Or call from Dagster using dagster-dbt integration
 
-  dbt:
-    build: ./dbt_project
+  # Streamlit Dashboard (optional)
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: streamlit_dashboard
+    restart: unless-stopped
+    networks:
+      - geopolitical-net
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       DATABASE_HOST: postgres
-    volumes:
-      - ./dbt_project:/dbt
-
-volumes:
-  postgres_data:
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${DATABASE_NAME:-geopolitical_platform}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    ports:
+      - "8501:8501"
+    profiles:
+      - dashboard
+    # Only starts if you use: docker-compose --profile dashboard up
