@@ -6,7 +6,7 @@ This is the entry point of our data pipeline.
 import os
 import pandas as pd
 from dagster import asset, AssetExecutionContext, Output, MetadataValue
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -53,9 +53,15 @@ def gtd_raw_data(context: AssetExecutionContext) -> Output:
 
     engine = get_postgres_connection()
 
+    # Create schema if it doesn't exist
+    with engine.connect() as conn:
+        conn.execute(text("CREATE SCHEMA IF NOT EXISTS data_raw"))
+        conn.commit()
+    context.log.info("✅ Ensured data_raw schema exists")
+
     context.log.info(f"💾 Writing {len(df.columns)} columns to data_raw.gtd_incidents...")
     context.log.info(f"   This preserves ALL source data for downstream transformations")
-    
+
     df.to_sql(
         name='gtd_incidents',
         schema='data_raw',

@@ -8,17 +8,18 @@ load_dotenv()
 def setup_database():
     """Create necessary schemas in the database."""
     db_url = f"postgresql://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}/{os.getenv('DATABASE_NAME')}"
-    
+
     engine = create_engine(db_url)
-    
-    schemas = ['raw_data', 'staging', 'intermediate', 'marts']
-    
+
+    # Schemas that match dbt_project.yml configuration
+    schemas = ['data_raw', 'raw', 'staging', 'intermediate', 'marts', 'dbt']
+
     with engine.connect() as conn:
         for schema in schemas:
             conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
             print(f"✓ Created schema: {schema}")
         conn.commit()
-    
+
     print("\n✅ Database setup complete!")
     print("\n📋 Next steps:")
     print("  1. Download GTD data from https://www.start.umd.edu/gtd/contact/")
