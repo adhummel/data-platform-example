@@ -8,9 +8,7 @@ venv/
 env/
 .venv
 *.egg-info/
-
-# Poetry (not used - using requirements.txt)
-poetry.lock
+*.egg
 
 # IDE
 .vscode/
@@ -34,11 +32,13 @@ data/processed/*
 dbt_project/logs/
 dbt_project/target/
 dbt_project/dbt_packages/
+dbt_project/.user.yml
 
 # Dagster
 dagster_home/
 .dagster/
 dagster_project/tmp*/
+tmp*/
 
 # OS
 .DS_Store
@@ -46,6 +46,3 @@ Thumbs.db
 
 # Notebooks
 .ipynb_checkpoints/
-
-# Streamlit
-.streamlit/

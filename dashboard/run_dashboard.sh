@@ -8,6 +8,9 @@ echo "🔒 THREAT INTELLIGENCE DASHBOARD 🔒"
 echo "=================================================="
 echo ""
 
+# Navigate to project root
+cd "$(dirname "$0")/.."
+
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then
     echo "⚠️  Virtual environment not found."
@@ -23,7 +26,7 @@ source venv/bin/activate
 # Install/upgrade requirements
 echo "Installing dashboard dependencies..."
 pip install -q --upgrade pip
-pip install -q -r requirements_dashboard.txt
+pip install -q -r requirements.txt
 
 echo "✅ Dependencies installed"
 echo ""
@@ -57,4 +60,4 @@ echo "Press Ctrl+C to stop the server"
 echo ""
 
 # Launch Streamlit
-streamlit run dashboard.py --server.address=localhost
+streamlit run dashboard/dashboard.py --server.address=localhost

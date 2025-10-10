@@ -83,7 +83,7 @@ dagster asset materialize --select '*'
 
 8. **Launch dashboard**
 ```bash
-streamlit run dashboard/app.py
+./dashboard/run_dashboard.sh
 ```
 
 ---
@@ -222,7 +222,7 @@ dbt test --select tag:quality
 
 - [Architecture Deep Dive](docs/architecture.md)
 - [Data Dictionary](docs/data_dictionary.md)
-- [Dagster Setup Guide](docs/dagster_guide.md)
+- [Dashboard Guide](docs/dashboard.md)
 - [GTD Field Reference](docs/gtd_fields.md)
 - [dbt Model Documentation](http://localhost:8080) - Run `dbt docs serve`
 
