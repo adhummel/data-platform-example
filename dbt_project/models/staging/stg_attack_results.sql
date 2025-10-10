@@ -8,12 +8,9 @@ select
     , (success = 1) AS was_successful
     , (suicide = 1) AS had_suicide
     , CASE
-    WHEN approxdate is not null and approxdate ~ '\d{4}' then
-        to_date(
-            regexp_replace(approxdate, '(\d+)-\d+', '\1')
-            , 'Month DD, YYYY'
-        )
-    ELSE NULL
+        WHEN approxdate IS NOT NULL AND approxdate ~ '\d{2}/\d{2}/\d{4}'
+        THEN TO_DATE(approxdate, 'MM/DD/YYYY')
+        ELSE NULL
     End as approx_date
     , iyear as year
     , motive
