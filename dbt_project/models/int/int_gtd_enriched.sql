@@ -72,10 +72,29 @@ enriched as (
         targets.target_name,
         targets.target_nationality,
 
+        -- Simplified target type
+        case
+            when targets.target_category ilike '%government%' or targets.target_category ilike '%police%' or targets.target_category ilike '%law enforcement%' then 'Government/Law Enforcement'
+            when targets.target_category ilike '%military%' or targets.target_category ilike '%armed%' then 'Military/Armed Groups'
+            when targets.target_category ilike '%citizen%' or targets.target_category ilike '%civilian%' then 'Civilians'
+            when targets.target_category ilike '%business%' or targets.target_category ilike '%infrastructure%' or targets.target_category ilike '%utilities%' then 'Infrastructure/Business'
+            else 'Other'
+        end as target_type_simplified,
+
         -- Weapon dimensions (from weapons)
         weapons.weapon_type_id,
         weapons.weapon_type,
         weapons.weapon_description,
+
+        -- Simplified weapon category
+        case
+            when weapons.weapon_type ilike '%explosive%' or weapons.weapon_type ilike '%bomb%' then 'Explosives'
+            when weapons.weapon_type ilike '%firearm%' or weapons.weapon_type ilike '%gun%' or weapons.weapon_type ilike '%rifle%' then 'Firearms'
+            when weapons.weapon_type ilike '%incendiary%' or weapons.weapon_type ilike '%fire%' then 'Fire/Incendiary'
+            when weapons.weapon_type ilike '%melee%' or weapons.weapon_type ilike '%knife%' then 'Melee'
+            when weapons.weapon_type ilike '%vehicle%' then 'Vehicle'
+            else 'Other'
+        end as weapon_category,
 
         -- Results & casualties (from results)
         results.num_killed,
@@ -105,7 +124,13 @@ enriched as (
             when targets.target_category in ('Government (General)', 'Military') then 'Government/Military Target'
             when targets.target_category in ('Private Citizens & Property', 'Business') then 'Civilian Target'
             else 'Other'
-        end as attack_type_category
+        end as attack_type_category,
+
+        -- High impact flag (high or extreme severity)
+        case
+            when coalesce(results.num_killed, 0) + coalesce(results.num_wounded, 0) > 25 then true
+            else false
+        end as is_high_impact
 
     from results
     left join location on results.event_id = location.event_id
