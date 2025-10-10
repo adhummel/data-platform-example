@@ -164,31 +164,31 @@ def load_data(query, _conn):
 # Data loading functions
 def load_hotspots(conn):
     """Load emerging hotspots data"""
-    query = "SELECT * FROM marts.emerging_hotspots ORDER BY hotspot_intensity_score DESC"
+    query = "SELECT * FROM dbt_marts.emerging_hotspots ORDER BY hotspot_intensity_score DESC"
     return load_data(query, conn)
 
 def load_group_expansion(conn):
     """Load group expansion data"""
-    query = "SELECT * FROM marts.group_expansion ORDER BY expansion_velocity DESC LIMIT 50"
+    query = "SELECT * FROM dbt_marts.group_expansion ORDER BY expansion_velocity DESC LIMIT 50"
     return load_data(query, conn)
 
 def load_cross_border(conn):
     """Load cross-border risk data"""
-    query = "SELECT * FROM marts.cross_border_risk ORDER BY total_spillover_risk_score DESC LIMIT 30"
+    query = "SELECT * FROM dbt_marts.cross_border_risk ORDER BY total_spillover_risk_score DESC LIMIT 30"
     return load_data(query, conn)
 
 def load_forecasting(conn):
     """Load forecasting dataset"""
     query = """
-        SELECT * FROM marts.forecasting_dataset
-        WHERE year >= (SELECT MAX(year) - 10 FROM marts.forecasting_dataset)
+        SELECT * FROM dbt_marts.forecasting_dataset
+        WHERE year >= (SELECT MAX(year) - 10 FROM dbt_marts.forecasting_dataset)
         ORDER BY year DESC, country
     """
     return load_data(query, conn)
 
 def load_clustering(conn):
     """Load group clustering features"""
-    query = "SELECT * FROM marts.group_clustering_features ORDER BY total_attacks DESC LIMIT 100"
+    query = "SELECT * FROM dbt_marts.group_clustering_features ORDER BY total_attacks DESC LIMIT 100"
     return load_data(query, conn)
 
 def load_network_data(conn):
