@@ -1,294 +1,553 @@
-# Geopolitical Data Platform 🌍
+# Global Terrorism Analytics Platform
 
-> End-to-end ELT pipeline for geopolitical and conflict analysis using Dagster, dbt, PostgreSQL, and Streamlit
+A production-grade data platform for analyzing global terrorism patterns, built with modern data engineering tools and best practices. This project demonstrates end-to-end ELT pipeline development, dimensional modeling, and analytical dashboard creation using real-world geopolitical data.
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![dbt](https://img.shields.io/badge/dbt-1.7+-orange.svg)](https://www.getdbt.com/)
-[![Dagster](https://img.shields.io/badge/dagster-latest-purple.svg)](https://dagster.io/)
+[![Dagster](https://img.shields.io/badge/dagster-1.7+-purple.svg)](https://dagster.io/)
 
----
+## Table of Contents
 
-## 📊 Project Overview
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Data Models](#data-models)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Analytics Capabilities](#analytics-capabilities)
+- [Development](#development)
+- [Documentation](#documentation)
 
-This project implements a **production-ready data platform** for analyzing global terrorism and conflict data using the **Global Terrorism Database (GTD)** from START consortium.
+## Overview
+
+### Purpose
+
+This platform ingests, transforms, and analyzes the Global Terrorism Database (GTD) to provide actionable insights into terrorism patterns, trends, and risk factors. The system is designed to answer critical analytical questions about:
+
+- Geographic hotspot emergence and intensity
+- Terrorist group expansion patterns and velocity
+- Cross-border spillover risks and network effects
+- Predictive risk factors and temporal trends
+- Behavioral clustering of terrorist organizations
+
+### Data Source
+
+**Global Terrorism Database (GTD)**
+- **Provider**: START Consortium, University of Maryland
+- **Coverage**: 200,000+ incidents from 1970 to present
+- **Scope**: Worldwide terrorism events with 135+ attributes per incident
+- **Update Frequency**: Annual releases
+- **Access**: Available via data request at https://www.start.umd.edu/gtd/
 
 ### Key Features
-- **Ingests** GTD data (200k+ incidents from 1970-present)
-- **Transforms** raw data into analytics-ready models using dbt
-- **Orchestrates** the entire pipeline with Dagster
-- **Visualizes** geopolitical insights through an interactive Streamlit dashboard
 
-**Use Cases**: 
-- Conflict trend analysis
-- Attack pattern identification
-- Regional threat assessment
-- Temporal analysis of terrorism evolution
-- Target and weapon type analysis
+- **Automated Data Pipeline**: Orchestrated ingestion and transformation via Dagster
+- **Dimensional Data Models**: Star schema design with dbt for analytical queries
+- **Interactive Dashboard**: Streamlit-based visualization layer with 6 analytical modules
+- **Scalable Architecture**: Containerized services with Docker Compose
+- **Data Quality**: Automated testing and validation at each pipeline stage
+- **Full Lineage Tracking**: Complete data lineage from source to dashboard
 
----
+## Architecture
 
-## 🚀 Quick Start
+### System Design
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Data Sources                              │
+│                   GTD Excel File (200k+ rows)                    │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   Ingestion Layer (Dagster)                      │
+│  • Reads GTD Excel file                                          │
+│  • Data validation and cleansing                                 │
+│  • Loads to PostgreSQL raw schema                                │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                Transformation Layer (dbt)                        │
+│                                                                   │
+│  Raw Layer                                                        │
+│  └─ data_raw.gtd_incidents (source table)                        │
+│                                                                   │
+│  Staging Layer                                                    │
+│  ├─ stg_attack_location                                          │
+│  ├─ stg_attack_actors                                            │
+│  ├─ stg_attack_weapons                                           │
+│  ├─ stg_attack_targets                                           │
+│  └─ stg_attack_results                                           │
+│                                                                   │
+│  Intermediate Layer                                              │
+│  ├─ int_gtd_enriched (base enrichment)                          │
+│  ├─ int_cross_border_flows                                      │
+│  ├─ int_spatial_hotspots                                        │
+│  ├─ int_group_expansion_tracking                                │
+│  ├─ int_predictive_features                                     │
+│  └─ int_region_time_series                                      │
+│                                                                   │
+│  Marts Layer                                                     │
+│  ├─ emerging_hotspots                                           │
+│  ├─ group_expansion                                             │
+│  ├─ cross_border_risk                                           │
+│  ├─ forecasting_dataset                                         │
+│  └─ group_clustering_features                                   │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                 Analytics Layer (Streamlit)                      │
+│  • Executive Summary Dashboard                                   │
+│  • Hotspot Intelligence                                          │
+│  • Group Expansion Analysis                                      │
+│  • Cross-Border Networks                                         │
+│  • Predictive Analytics                                          │
+│  • Behavioral Clustering                                         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Technology Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Orchestration** | Dagster 1.7 | Asset-based pipeline orchestration, scheduling, monitoring |
+| **Transformation** | dbt 1.7 | SQL-based data transformation, testing, documentation |
+| **Database** | PostgreSQL 15 | OLAP data warehouse for analytical queries |
+| **Visualization** | Streamlit | Interactive dashboard and data exploration |
+| **Analytics** | Python, Pandas, NumPy | Data processing and feature engineering |
+| **ML Libraries** | scikit-learn, NetworkX | Clustering analysis and network graphs |
+| **Containerization** | Docker, Docker Compose | Service orchestration and deployment |
+| **Data Visualization** | Plotly | Interactive charts and maps |
+
+## Data Models
+
+### Analytical Marts
+
+The platform produces five key analytical marts, each optimized for specific use cases:
+
+#### 1. Emerging Hotspots (`dbt_marts.emerging_hotspots`)
+Identifies and scores geographic regions with concentrated terrorism activity.
+
+**Key Metrics:**
+- Hotspot intensity score (0-100)
+- Recent incident counts (trailing 3 years)
+- Year-over-year trend direction
+- Threat level classification (Critical/High/Moderate/Low)
+- Active terrorist group count
+
+**Use Case:** Monitor emerging threat zones and allocate security resources
+
+#### 2. Group Expansion (`dbt_marts.group_expansion`)
+Tracks terrorist organization geographic expansion over time.
+
+**Key Metrics:**
+- Expansion velocity (countries per year)
+- Total countries operated
+- Recent expansion activity (5-year window)
+- Years active
+- Threat classification
+
+**Use Case:** Identify rapidly expanding organizations requiring counter-terrorism focus
+
+#### 3. Cross-Border Risk (`dbt_marts.cross_border_risk`)
+Analyzes terrorism spillover patterns across national borders.
+
+**Key Metrics:**
+- Spillover risk score (composite metric)
+- Source country diversity
+- Total spillover attacks
+- Shared terrorist groups
+- Average time to spillover
+
+**Use Case:** Assess regional stability and cross-border security cooperation needs
+
+#### 4. Forecasting Dataset (`dbt_marts.forecasting_dataset`)
+Time-series features for predictive modeling of future incidents.
+
+**Key Metrics:**
+- Incident momentum (3-year moving average)
+- Volatility indicators
+- Prior year spike detection
+- Lagged casualty counts
+- Active group tracking
+
+**Use Case:** Build machine learning models for risk forecasting
+
+#### 5. Group Clustering Features (`dbt_marts.group_clustering_features`)
+Behavioral feature set for terrorist organization segmentation.
+
+**Key Metrics:**
+- Normalized attack volume, lethality, geographic reach
+- Suicide attack rate
+- Success rate
+- Weapon preferences (explosives, firearms)
+- Target preferences (government, civilian)
+
+**Use Case:** Understand terrorist group archetypes and tactical patterns
+
+### Data Modeling Approach
+
+The project follows **dimensional modeling** best practices:
+
+- **Layered Architecture**: Raw → Staging → Intermediate → Marts
+- **Staging Models**: One-to-one with source, type casting and basic cleansing
+- **Intermediate Models**: Complex business logic, feature engineering
+- **Marts**: Denormalized, analytics-ready tables optimized for query performance
+- **Incremental Logic**: Designed for efficient daily refreshes
+- **Testing**: Schema tests, unique/not-null constraints, referential integrity
+
+## Getting Started
 
 ### Prerequisites
-- Python 3.9+
-- Docker (for PostgreSQL)
-- Git
-- GTD Data Access (see Data Acquisition below)
+
+- **Python 3.9+**
+- **Docker & Docker Compose**
+- **Git**
+- **GTD Data Access** (see Data Acquisition section)
 
 ### Installation
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/geopolitical-data-platform.git
-cd geopolitical-data-platform
+git clone <repository-url>
+cd data-platform-example
 ```
 
-2. **Set up Python environment**
+2. **Set up environment**
 ```bash
-# Using Poetry (recommended)
-poetry install
-
-# OR using pip
+# Create Python virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-3. **Start PostgreSQL**
-```bash
-docker-compose up -d
-```
-
-4. **Configure environment**
+3. **Configure environment variables**
 ```bash
 cp .env.example .env
-# Edit .env with your credentials
+# Edit .env with your configuration
 ```
 
-5. **Acquire GTD data** (see Data Acquisition section below)
+Example `.env`:
+```bash
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_NAME=geopolitical_platform
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+GTD_DATA_PATH=data/raw/globalterrorismdb_0522dist.xlsx
+```
+
+4. **Acquire GTD data**
+- Visit https://www.start.umd.edu/gtd/contact/
+- Complete data request form
+- Download Excel file
+- Place in `data/raw/globalterrorismdb_0522dist.xlsx`
+
+5. **Start infrastructure**
+```bash
+# Start PostgreSQL
+docker-compose up -d postgres
+
+# Verify database is healthy
+docker-compose ps
+```
 
 6. **Initialize database**
 ```bash
 python scripts/setup_database.py
 ```
 
-7. **Run the pipeline**
+### Running the Pipeline
+
+#### Option 1: Local Development
+
 ```bash
 # Start Dagster UI
+dagster dev -f dagster_project
+
+# In Dagster UI (http://localhost:3000):
+# 1. Navigate to Assets
+# 2. Click "Materialize all"
+# Or materialize specific assets
+```
+
+#### Option 2: Docker Compose (Production-like)
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Access Dagster UI at http://localhost:3000
+# Materialize assets through the UI
+```
+
+### Launching the Dashboard
+
+```bash
+# From project root
+./dashboard/run_dashboard.sh
+
+# Or manually
+cd dashboard
+streamlit run dashboard.py
+
+# Access at http://localhost:8501
+```
+
+## Usage
+
+### Running dbt Transformations
+
+```bash
+cd dbt_project
+
+# Run all models
+dbt run
+
+# Run specific layer
+dbt run --select staging
+dbt run --select marts
+
+# Run specific model
+dbt run --select emerging_hotspots
+
+# Test data quality
+dbt test
+
+# Generate documentation
+dbt docs generate
+dbt docs serve  # Access at http://localhost:8080
+```
+
+### Dagster Operations
+
+```bash
+# Launch Dagster UI
 dagster dev
 
-# In another terminal, materialize assets
+# Materialize all assets
 dagster asset materialize --select '*'
+
+# Materialize specific asset
+dagster asset materialize --select gtd_raw_data
+
+# Run with sensors/schedules
+dagster-daemon run
 ```
 
-8. **Launch dashboard**
-```bash
-./dashboard/run_dashboard.sh
-```
+### Dashboard Features
 
----
+The Streamlit dashboard provides six analytical modules:
 
-## 📥 Data Acquisition
+1. **Executive Summary**: High-level metrics and KPIs
+2. **Hotspot Intelligence**: Geographic heat maps and intensity scoring
+3. **Group Expansion**: Organization growth tracking and velocity analysis
+4. **Cross-Border Networks**: Network graphs and spillover risk maps
+5. **Predictive Analytics**: Time-series trends and risk forecasting
+6. **Behavioral Clustering**: K-means clustering and tactical pattern analysis
 
-### Global Terrorism Database (GTD)
-
-The GTD is maintained by START (National Consortium for the Study of Terrorism and Responses to Terrorism) at the University of Maryland.
-
-**To obtain the data:**
-
-1. Visit: https://www.start.umd.edu/gtd/contact/
-2. Complete the data request form
-3. Download the Excel file (globalterrorismdb.xlsx)
-4. Place it in `data/raw/globalterrorismdb.xlsx`
-
-**Data Overview:**
-- 200,000+ terrorist incidents (1970-2020)
-- 135+ variables per incident
-- Geographic coverage: worldwide
-- Regular updates from START consortium
-
-**Key Fields:**
-- Date/time, location (country, region, city, coordinates)
-- Attack characteristics (type, success, suicide)
-- Weapon types, target types
-- Casualties (killed, wounded)
-- Perpetrator groups
-
----
-
-## 🏗️ Architecture
+## Project Structure
 
 ```
-┌─────────────────┐       ┌──────────────┐       ┌─────────────────┐
-│   GTD Dataset   │──────▶│   Dagster    │──────▶│   PostgreSQL/   │
-│  (Excel/CSV)    │       │ Orchestrator │       │   Snowflake     │
-└─────────────────┘       └──────────────┘       └─────────────────┘
-                                 │                         │
-                                 │                         │
-                                 ▼                         ▼
-                          ┌──────────────┐       ┌─────────────────┐
-                          │     dbt      │──────▶│    Streamlit    │
-                          │ Transformations      │    Dashboard    │
-                          └──────────────┘       └─────────────────┘
+.
+├── dagster_project/          # Orchestration layer
+│   ├── assets/
+│   │   ├── ingestion.py      # GTD data ingestion asset
+│   │   └── dbt_assets.py     # dbt transformation assets
+│   ├── resources/            # Database connections
+│   ├── schedules/            # Scheduled runs
+│   └── sensors/              # Event-driven triggers
+│
+├── dbt_project/              # Transformation layer
+│   ├── models/
+│   │   ├── raw/              # Source definitions
+│   │   ├── staging/          # Cleaned, typed models
+│   │   ├── int/              # Intermediate business logic
+│   │   └── marts/            # Analytics-ready tables
+│   ├── tests/                # Data quality tests
+│   └── macros/               # Reusable SQL functions
+│
+├── dashboard/                # Visualization layer
+│   ├── dashboard.py          # Streamlit application
+│   ├── .streamlit/           # Dashboard configuration
+│   └── run_dashboard.sh      # Launch script
+│
+├── scripts/                  # Utility scripts
+│   └── setup_database.py     # Database initialization
+│
+├── tests/                    # Unit and integration tests
+│   └── test_dashboard_connection.py
+│
+├── docs/                     # Documentation
+│   ├── architecture.md       # System design details
+│   ├── data_dictionary.md    # Field definitions
+│   ├── dashboard.md          # Dashboard user guide
+│   └── gtd_fields.md         # GTD schema reference
+│
+├── data/                     # Data directory (gitignored)
+│   └── raw/                  # Source data files
+│
+├── docker-compose.yml        # Service orchestration
+├── requirements.txt          # Python dependencies
+├── .env.example              # Environment template
+└── README.md                 # This file
 ```
 
-### Tech Stack
-- **Orchestration**: Dagster (asset-based orchestration)
-- **Transformation**: dbt (dimensional modeling)
-- **Warehouse**: PostgreSQL (dev) → Snowflake (prod)
-- **Visualization**: Streamlit + Plotly
-- **Language**: Python 3.9+
+## Analytics Capabilities
 
----
+### Questions This Platform Answers
 
-## 🔄 Data Pipeline
+**Geographic Analysis:**
+- Where are terrorism hotspots emerging over time?
+- Which regions show accelerating or declining trends?
+- What is the geographic distribution of different attack types?
 
-### 1. Ingestion Layer
-- Reads GTD Excel file
-- Validates data quality
-- Loads to `raw_data.gtd_incidents` table
-- Handles incremental loads
+**Organizational Intelligence:**
+- Which terrorist groups are expanding their operational reach fastest?
+- How do groups differ in tactics, lethality, and targeting?
+- What are the behavioral patterns of high-threat organizations?
 
-### 2. Transformation Layer (dbt)
+**Cross-Border Dynamics:**
+- Which countries face the greatest spillover risks?
+- What are the network effects between perpetrator and victim countries?
+- How do shared terrorist groups affect regional security?
 
-**Staging Models** (`models/staging/`)
-- `stg_gtd_incidents`: Clean and standardize incident records
-- `stg_gtd_locations`: Geocoded location data
-- `stg_gtd_groups`: Perpetrator group information
+**Predictive Analytics:**
+- What are the leading indicators of increased terrorism risk?
+- Which countries show high momentum and volatility?
+- How do casualty rates correlate with incident frequency?
 
-**Intermediate Models** (`models/intermediate/`)
-- `int_incidents_enriched`: Join incidents with location and group context
-- `int_casualties_aggregated`: Calculate casualty metrics
-- `int_temporal_features`: Extract temporal patterns
+**Behavioral Patterns:**
+- Are there distinct terrorist group archetypes?
+- How do weapon and target preferences cluster?
+- What tactical patterns emerge from unsupervised learning?
 
-**Mart Models** (`models/marts/`)
-- `fct_incidents`: Fact table with all incidents and metrics
-- `dim_locations`: Location dimension (country, region, city)
-- `dim_groups`: Perpetrator group dimension
-- `dim_attack_types`: Attack methodology dimension
-- `metrics_regional`: Regional aggregated metrics
-- `metrics_temporal`: Time-series metrics
+## Development
 
-### 3. Orchestration Layer (Dagster)
-- Scheduled daily runs for new data
-- Asset-based dependency management
-- Data quality checks
-- Automatic retries and alerting
-- Full lineage tracking
-
-### 4. Visualization Layer
-**Key Dashboards**:
-- Global incident heatmap
-- Temporal trends (incidents/casualties over time)
-- Regional breakdowns (Middle East, South Asia, etc.)
-- Attack type analysis
-- Perpetrator group profiles
-- Target analysis (government, civilian, military)
-
----
-
-## 📈 Sample Analytics Questions
-
-This platform can answer questions like:
-
-- What are the global trends in terrorism incidents from 1970-2020?
-- Which regions have seen the most significant increase/decrease in attacks?
-- What are the most common attack types by region?
-- How have casualty rates evolved over time?
-- Which terrorist groups are most active in specific regions?
-- What are the most frequently targeted entities?
-- How do attack patterns differ between urban and rural areas?
-- What is the success rate of different attack methodologies?
-
----
-
-## 🧪 Testing
+### Running Tests
 
 ```bash
-# Run dbt tests
+# dbt tests
 cd dbt_project
 dbt test
 
-# Run Python tests
+# Python unit tests
 pytest tests/
 
-# Run data quality checks
-dbt test --select tag:quality
+# Dashboard connection test
+python tests/test_dashboard_connection.py
 ```
 
+### Code Quality
+
+```bash
+# Format code
+black .
+
+# Lint code
+ruff check .
+```
+
+### Adding New Models
+
+1. Create SQL file in appropriate dbt directory
+2. Add schema documentation in `schema.yml`
+3. Write tests for data quality
+4. Update mart dependencies in Dagster
+5. Add visualizations to dashboard if applicable
+
+## Documentation
+
+Comprehensive documentation is available in the `/docs` directory:
+
+- **[Architecture Guide](docs/architecture.md)**: Detailed system design and data flow
+- **[Data Dictionary](docs/data_dictionary.md)**: Complete field definitions and business logic
+- **[Dashboard Guide](docs/dashboard.md)**: User manual for the analytics dashboard
+- **[GTD Fields Reference](docs/gtd_fields.md)**: Source data schema and field descriptions
+
+Generate dbt documentation:
+```bash
+cd dbt_project
+dbt docs generate
+dbt docs serve
+```
+
+## Data Ethics and Security
+
+### Important Considerations
+
+This platform processes sensitive information about violent events. Users must:
+
+- **Use Responsibly**: For research, analysis, and security purposes only
+- **Respect Terms of Use**: Comply with GTD data usage restrictions (non-commercial research)
+- **Implement Access Controls**: Secure sensitive data in production environments
+- **Consider Privacy**: Anonymize data for public-facing applications
+- **Follow Governance**: Adhere to organizational data policies and regulations
+
+### Security Best Practices
+
+- Never commit `.env` files or credentials to version control
+- Use role-based access control (RBAC) in production databases
+- Implement SSL/TLS for database connections
+- Regularly audit data access logs
+- Apply data retention policies per compliance requirements
+
+## Roadmap
+
+### Current Status
+
+- [x] GTD data ingestion pipeline
+- [x] Dimensional data models (staging → marts)
+- [x] Dagster orchestration and monitoring
+- [x] Interactive Streamlit dashboard
+- [x] Docker containerization
+- [x] Data quality testing framework
+
+### Future Enhancements
+
+- [ ] Cloud deployment (AWS/GCP/Azure)
+- [ ] Snowflake integration for production warehouse
+- [ ] Additional data sources (ACLED, UCDP conflict data)
+- [ ] Machine learning models for prediction
+- [ ] CI/CD pipeline with GitHub Actions
+- [ ] dbt contracts for data contracts enforcement
+- [ ] Advanced geographic visualizations (Folium maps)
+- [ ] API layer for programmatic access
+- [ ] Real-time data ingestion capabilities
+
+## Contributing
+
+Contributions are welcome! To contribute:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Write tests for new functionality
+4. Ensure all tests pass (`pytest tests/ && dbt test`)
+5. Submit a pull request with clear description
+
+## License
+
+This project is licensed under the MIT License. See LICENSE file for details.
+
+**Data License**: GTD data usage must comply with START Consortium terms of use.
+
+## Acknowledgments
+
+- **START Consortium** (University of Maryland) for maintaining the Global Terrorism Database
+- **Dagster**, **dbt**, and **Streamlit** communities for excellent open-source tools
+- Contributors and maintainers of supporting libraries
+
+## Contact
+
+For questions, issues, or collaboration opportunities:
+
+- **GitHub Issues**: [Project Issues](../../issues)
+- **Discussions**: [Project Discussions](../../discussions)
+
 ---
 
-## 📚 Documentation
-
-- [Architecture Deep Dive](docs/architecture.md)
-- [Data Dictionary](docs/data_dictionary.md)
-- [Dashboard Guide](docs/dashboard.md)
-- [GTD Field Reference](docs/gtd_fields.md)
-- [dbt Model Documentation](http://localhost:8080) - Run `dbt docs serve`
-
----
-
-## 🚧 Roadmap
-
-- [x] GTD data ingestion
-- [x] Core dbt models (staging → marts)
-- [x] Dagster orchestration
-- [ ] Snowflake integration
-- [ ] Add ACLED data (Armed Conflict Location & Event Data)
-- [ ] Add UCDP data (Uppsala Conflict Data Program)
-- [ ] Implement data contracts (dbt contracts + Dagster checks)
-- [ ] Geographic visualization (Folium maps)
-- [ ] Predictive analytics (conflict forecasting)
-- [ ] CI/CD pipeline
-- [ ] Deploy to cloud (AWS/GCP)
-
----
-
-## 🔒 Data Ethics & Security
-
-**Important Considerations:**
-
-- This data contains sensitive information about violent events
-- Use responsibly and ethically for research/analysis purposes only
-- Respect GTD terms of use (non-commercial research use)
-- Implement appropriate access controls in production
-- Consider data anonymization for public-facing applications
-- Follow your organization's data governance policies
-
----
-
-## 🤝 Contributing
-
-Contributions welcome! Please:
-1. Fork the repo
-2. Create a feature branch
-3. Add tests for new features
-4. Submit a Pull Request
-
----
-
-## 📜 License
-
-MIT License - see [LICENSE](LICENSE) file for details
-
-**Data License**: GTD data usage must comply with START consortium terms
-
----
-
-## 🙏 Acknowledgments
-
-- START consortium (University of Maryland) for GTD data
-- National Consortium for the Study of Terrorism and Responses to Terrorism
-- Dagster, dbt, and Streamlit communities
-
----
-
-## 📞 Contact
-
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [yourprofile](https://linkedin.com/in/yourprofile)
-
----
-
-**⭐ If this project helped you understand modern data platforms, please give it a star!**
+**Built with modern data engineering best practices for analytics at scale.**
