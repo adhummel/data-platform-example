@@ -129,11 +129,11 @@ def test_mart_tables():
         cursor = conn.cursor()
 
         required_tables = [
-            'marts.emerging_hotspots',
-            'marts.group_expansion',
-            'marts.cross_border_risk',
-            'marts.forecasting_dataset',
-            'marts.group_clustering_features'
+            'dbt_marts.emerging_hotspots',
+            'dbt_marts.group_expansion',
+            'dbt_marts.cross_border_risk',
+            'dbt_marts.forecasting_dataset',
+            'dbt_marts.group_clustering_features'
         ]
 
         all_exist = True

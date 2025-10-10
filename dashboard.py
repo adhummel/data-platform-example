@@ -200,7 +200,7 @@ def load_network_data(conn):
             cf.total_spillover_attacks as weight,
             cf.num_shared_groups,
             cf.spillover_intensity_score
-        FROM intermediate.int_cross_border_flows cf
+        FROM dbt_intermediate.int_cross_border_flows cf
         WHERE cf.total_spillover_attacks > 5
         ORDER BY cf.spillover_intensity_score DESC
         LIMIT 100
