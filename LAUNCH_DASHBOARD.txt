@@ -1,0 +1,75 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║     🌍 GLOBAL TERRORISM DATABASE - THREAT INTELLIGENCE 🌍        ║
+║                                                                  ║
+║                    FBI-STYLE ANALYTICS DASHBOARD                 ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+🚀 QUICK LAUNCH COMMANDS:
+
+Option 1 (Recommended):
+   ./run_dashboard.sh
+
+Option 2 (Manual):
+   pip install -r requirements_dashboard.txt
+   streamlit run dashboard.py
+
+📍 Access at: http://localhost:8501
+
+═══════════════════════════════════════════════════════════════════
+
+📊 DASHBOARD CAPABILITIES:
+
+✅ Where are terrorism hotspots emerging over time?
+   → Interactive global heatmap with intensity scoring
+
+✅ What groups are expanding their operational reach fastest?
+   → Expansion velocity tracking and geographic analysis
+
+✅ Which countries face the most cross-border terrorism spillovers?
+   → Network graph linking perpetrators, countries, and targets
+
+✅ Can we predict where and when the next attack might occur?
+   → Predictive analytics with risk scoring and trend forecasting
+
+✅ Are there clusters of groups with similar behavioral patterns?
+   → 3D K-means clustering with behavioral archetype analysis
+
+═══════════════════════════════════════════════════════════════════
+
+🎨 FEATURES:
+
+• 6 Interactive Modules
+• Real-time Threat Metrics
+• Heat Maps & Network Graphs
+• 3D Clustering Visualization
+• Predictive Risk Scoring
+• Cross-Border Flow Analysis
+• Behavioral Pattern Recognition
+• FBI/Detective Style Theme
+• Dark Mode Interface
+• Courier New Monospace Fonts
+• Color-Coded Threat Levels
+
+═══════════════════════════════════════════════════════════════════
+
+📚 DOCUMENTATION:
+
+• DASHBOARD_QUICKSTART.md - Get started in 3 steps
+• DASHBOARD_README.md - Full documentation
+• DASHBOARD_FEATURES.md - Detailed feature breakdown
+
+═══════════════════════════════════════════════════════════════════
+
+🔧 REQUIREMENTS:
+
+✓ Python 3.9+
+✓ PostgreSQL database running
+✓ dbt marts materialized
+✓ Dependencies installed (see requirements_dashboard.txt)
+
+═══════════════════════════════════════════════════════════════════
+
+🔒 RESTRICTED - THREAT INTELLIGENCE ANALYSIS 🔒
+
