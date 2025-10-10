@@ -20,5 +20,5 @@ select
     total_attacks,
     countries_operated
     
-from {{ ref('int_group_behavioral_signatures') }}
+from {{ ref('int_group_behavioral_trends') }}
 order by total_attacks desc
