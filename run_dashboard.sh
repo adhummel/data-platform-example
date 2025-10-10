@@ -57,4 +57,4 @@ echo "Press Ctrl+C to stop the server"
 echo ""
 
 # Launch Streamlit
-streamlit run dashboard.py
+streamlit run dashboard.py --server.address=localhost
